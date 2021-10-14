@@ -8,6 +8,7 @@ import time
 
 import wx
 import ETH_Test
+import this
 
 
 class Frame(wx.Frame):
