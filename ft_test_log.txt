@@ -1,0 +1,1 @@
+CONSOLE test start local console get value is cat: console.txt: No such file or directory CONSOLE Test Failed, error code 19001 

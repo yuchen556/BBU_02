@@ -5,15 +5,37 @@
 #
 # -------------------------------------------------------------------------------
 import time
-
 import wx
-import ETH_Test
-import this
+import subprocess
+from ETH_test import ETH_test
+from VGA_test import VGA_test
+from USB_test import USB_test
+from SATA_test import SATA_test
+from CPU_test import CPU_test
+from Memory_test import Memory_test
+from CONSOLE_test import CONSOLE_test
+from PCIE_test import PCIE_test
+from SSD_test import SSD_test
+from SFP_test import SFP_test
 
+ETHPORT = 'enp2s0'
+HOSTPORT = '10.168.1.124'
+buildoption_type='Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
+logname = 'ft_test_log.txt'
+hostname = '10.168.1.213'
+port = 22
+username = 'root'
+password = '1'
+SFPPORT1 = 'enp184s0f0'
+SFPPORT2 = 'enp184s0f1'
+SFPPORT3 = 'enp184s0f2'
+SFPPORT4 = 'enp184s0f3'
+
+subprocess.getoutput("rm -f %s"%(logname))
 
 class Frame(wx.Frame):
     def __init__(self, title):
-        wx.Frame.__init__(self, None, title=title, pos=(150, 150), size=(500, 600))
+        wx.Frame.__init__(self, None, title=title, pos=(150, 150), size=(1080, 720))
         self.Bind(wx.EVT_CLOSE, self.close_frame)
 
         panel = wx.Panel(self)
@@ -104,6 +126,12 @@ class Frame(wx.Frame):
         self.start_dialog = wx.MessageDialog(None, "要进行测试吗？ Do You Want To Test?", "测试", wx.YES_NO | wx.ICON_QUESTION)
         self.start_result = self.start_dialog.ShowModal()
         self.start_dialog.Destroy()
+        connect = subprocess.getoutput("ping -c 2 %s" % hostname)
+        print(connect)
+        if ('100% packet loss' in connect):
+            print("connect to device failed")
+        else:
+            print("connect to device success")
 
         if self.start_result == wx.ID_YES:
 
@@ -131,36 +159,101 @@ class Frame(wx.Frame):
 
             sn = self.m_serial.GetValue()
             print(sn)
-            ETH_Test.ethernet(T_104_ETH, T_105_SFP)
-            print(T_101_VGA)
-            print(T_102_Write_MAC)
-            print(T_103_Write_FRU)
+
+            if T_101_VGA:
+                global VGA_result
+                VGA_result = VGA_test(logname).test_content()
+                print('VGA test result is %s' % (VGA_result))
+            else:
+                VGA_result = 'not test'
+
+            # print(T_101_VGA)
+            # print(T_102_Write_MAC)
+            # print(T_103_Write_FRU)
             # time.sleep(3)
             self.test_bt.SetLabelText("Testing 30%")
 
-            print(T_104_ETH)
-            print(T_105_SFP)
-            print(T_106_CPU)
+            if T_104_ETH:
+                global ETH_result
+                ETH_result = ETH_test(logname, ETHPORT, HOSTPORT, hostname, port, username, password).test_content()
+                print('ETH test result is %s' % (ETH_result))
+            else:
+                ETH_result = 'not test'
+            if T_105_SFP:
+                global SFP_result
+                SFP_result = SFP_test(logname, hostname, port, username, password, SFPPORT1, SFPPORT2, SFPPORT3,
+                                      SFPPORT4).test_content()
+                print('SFP test result is %s' % (SFP_result))
+            else:
+                SFP_result = 'not test'
+            if T_106_CPU:
+                global CPU_result
+                CPU_result = CPU_test(logname, buildoption_type, hostname, port, username, password).test_content()
+                print('CPU test result is %s' % (CPU_result))
+            else:
+                CPU_result = 'not test'
+            # print(T_104_ETH)
+            # print(T_105_SFP)
+            # print(T_106_CPU)
 
             # time.sleep(3)
             self.test_bt.SetLabelText("Testing 60%")
 
-            print(T_107_Memort)
-            print(T_108_Console)
-            print(T_109_USB)
+            if T_107_Memort:
+                global Memory_result
+                Memory_result = Memory_test(logname, hostname, port, username, password).test_content()
+                print('Memory test result is %s' % (Memory_result))
+            else:
+                Memory_result = 'not test'
+            if T_108_Console:
+                global CONSOLE_result
+                CONSOLE_result = CONSOLE_test(logname, hostname, port, username, password).test_content()
+                print('CONSOLE test result is %s' % (CONSOLE_result))
+            else:
+                CONSOLE_result = 'not test'
+            if T_109_USB:
+                global USB_result
+                USB_result = USB_test(logname, hostname, port, username, password).test_content()
+                print('USB test result is %s' % (USB_result))
+            else:
+                USB_result = 'not test'
+            # print(T_107_Memort)
+            # print(T_108_Console)
+            # print(T_109_USB)
 
             # time.sleep(3)
             self.test_bt.SetLabelText("Testing 90%")
 
-            print(T_110_PCI_E)
-            print(T_111_SATA)
-            print(T_112_M_2)
+            if T_110_PCI_E:
+                global PCIE_result
+                PCIE_result = PCIE_test(logname, hostname, port, username, password).test_content()
+                print('PCIE test result is %s' % (PCIE_result))
+            else:
+                PCIE_result = 'not test'
+            if T_111_SATA:
+                global SATA_result
+                SATA_result = SATA_test(logname, hostname, port, username, password).test_content()
+                print('SATA test result is %s' % (SATA_result))
+            else:
+                SATA_result = 'not test'
+            if T_112_M_2:
+                global SSD_result
+                SSD_result = SSD_test(logname, hostname, port, username, password).test_content()
+                print('M.2 test result is %s' % (SSD_result))
+            else:
+                SSD_result = 'not test'
+            # print(T_110_PCI_E)
+            # print(T_111_SATA)
+            # print(T_112_M_2)
 
             # time.sleep(2)
             self.test_bt.SetLabelText("Testing 90%")
             print("Yes")
 
-            self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", "测试结果", wx.YES_NO | wx.ICON_QUESTION)
+            test_result = 'VGA: %s \rETH: %s \rSFP: %s \rCPU: %s\rMemory: %s\rCONSOLE: %s\rUSB: %s\rPCIE: %s\r SATA: %s\rM.2: %s\r'\
+                          %(VGA_result, ETH_result, SFP_result, CPU_result, Memory_result, CONSOLE_result, USB_result, PCIE_result, SATA_result, SSD_result)
+
+            self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", test_result, wx.YES_NO | wx.ICON_QUESTION)
             self.summary_result = self.summary_dialog.ShowModal()
             self.summary_dialog.Destroy()
 
