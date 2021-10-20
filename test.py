@@ -33,10 +33,10 @@ SFPPORT4 = 'enp184s0f3'
 
 subprocess.getoutput("rm -f %s"%(logname))
 
-# testitem=['PCIE_BBU']
+testitem=['CONSOLE_BBU']
 
-testitem=['VGA_BBU','ETH_BBU','USB_BBU','SATA_BBU','M.2_BBU',
-          'SFP_BBU','CPU_BBU','MEMORY_BBU','CONSOLE_BBU','PCIE_BBU']
+# testitem=['VGA_BBU','ETH_BBU','USB_BBU','SATA_BBU','M.2_BBU',
+#           'SFP_BBU','CPU_BBU','MEMORY_BBU','CONSOLE_BBU','PCIE_BBU']
 for item in testitem:
     if (item=='VGA_BBU'):
         VGA_result=VGA_test(logname).test_content()

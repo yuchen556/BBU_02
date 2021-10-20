@@ -17,6 +17,7 @@ from CONSOLE_test import CONSOLE_test
 from PCIE_test import PCIE_test
 from SSD_test import SSD_test
 from SFP_test import SFP_test
+from switch_keycode import switch_keycode
 
 ETHPORT = 'enp2s0'
 HOSTPORT = '10.168.1.124'
@@ -30,14 +31,18 @@ SFPPORT1 = 'enp184s0f0'
 SFPPORT2 = 'enp184s0f1'
 SFPPORT3 = 'enp184s0f2'
 SFPPORT4 = 'enp184s0f3'
+value2 = ''
 
 subprocess.getoutput("rm -f %s"%(logname))
 
 class Frame(wx.Frame):
     def __init__(self, title):
-        wx.Frame.__init__(self, None, title=title, pos=(150, 150), size=(1080, 720))
+        wx.Frame.__init__(self, None, title=title, pos=(720, 50), size=(1080, 720))
         self.Bind(wx.EVT_CLOSE, self.close_frame)
+        # self.Bind(wx.EVT_KEY_DOWN, self.on_key_press)
+        # self.Bind(wx.EVT_KEY_UP, self.on_key_release)
 
+        global panel,hbox
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
@@ -65,8 +70,8 @@ class Frame(wx.Frame):
         hbox.Add(self.m_text_SN, 1, flag=wx.ALL, border=6)
 
         # Serial number Text entry 02CB091800002
-        self.m_serial = wx.TextCtrl(panel, 1)
-        hbox.Add(self.m_serial, 1, flag=wx.ALL, border=6)
+        self.m_serial = wx.TextCtrl(panel, 1,)
+        hbox.Add(self.m_serial, 2, flag=wx.ALL, border=6)
 
         self.T_01_VGA = wx.CheckBox(panel, 1, '01-VGA Test')
         self.T_01_VGA.SetValue(True)
@@ -122,6 +127,7 @@ class Frame(wx.Frame):
         panel.Layout()
 
     def start_test(self, event):
+
 
         self.start_dialog = wx.MessageDialog(None, "要进行测试吗？ Do You Want To Test?", "测试", wx.YES_NO | wx.ICON_QUESTION)
         self.start_result = self.start_dialog.ShowModal()
@@ -247,13 +253,13 @@ class Frame(wx.Frame):
             # print(T_112_M_2)
 
             # time.sleep(2)
-            self.test_bt.SetLabelText("Testing 90%")
+            self.test_bt.SetLabelText("Testing 100%")
             print("Yes")
 
             test_result = 'VGA: %s \rETH: %s \rSFP: %s \rCPU: %s\rMemory: %s\rCONSOLE: %s\rUSB: %s\rPCIE: %s\r SATA: %s\rM.2: %s\r'\
                           %(VGA_result, ETH_result, SFP_result, CPU_result, Memory_result, CONSOLE_result, USB_result, PCIE_result, SATA_result, SSD_result)
 
-            self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", test_result, wx.YES_NO | wx.ICON_QUESTION)
+            self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", test_result, wx.OK | wx.ICON_INFORMATION)
             self.summary_result = self.summary_dialog.ShowModal()
             self.summary_dialog.Destroy()
 
@@ -274,10 +280,41 @@ class Frame(wx.Frame):
         if result == wx.ID_YES:
             self.Destroy()
 
+    def on_key_press(self, event):
+        # print('key press')
+        global Key_Code,value,value2,t_press
+        t_press = time.time()
+        Key_Code = event.GetKeyCode()
+        if (48 <= Key_Code <= 90):
+            value = switch_keycode(Key_Code).switch_content()
+            value2 = str(value2) + str(value)
+            # print(value)
+            # print(value2)
+
+    def on_key_release(self, event):
+        # print('key release')
+        t_realease = time.time()
+        duration = t_realease - t_press
+        # print(duration)
+        global value2
+        if duration > 0.04:
+            warning_message = wx.MessageDialog(None, "please do not input manually", "warning", wx.OK | wx.ICON_INFORMATION)
+            value2 = ''
+            if warning_message.ShowModal() == wx.ID_OK:
+                warning_message.Destroy()
+        elif Key_Code == 13:
+            # print('press enter')
+            self.m_serial.SetValue(value2)
+
+
+
+
 
 class MyApp(wx.App):
     def OnInit(self):
         self.frame = Frame("Function Test Platform V0.9")
+        self.Bind(wx.EVT_KEY_DOWN, self.frame.on_key_press)
+        self.Bind(wx.EVT_KEY_UP, self.frame.on_key_release)
         self.frame.Show()
         return True
 
