@@ -1,9 +1,12 @@
-import serial
+import re
 
-ser = serial.Serial("/dev/ttyUSB0",115200,timeout=10)
-print(ser)
-ser.write('abcdefg'.encode())
-data = ser.read(7)
-print(data)
-if ('abcdefg'.encode() in data):
+SN = '123456cb89121'
+pattern = re.compile(r'[a-z]')
+
+a = pattern.findall(SN)
+print (a)
+
+if ((len(SN) != 13) or a):
+    print('test fail')
+else:
     print('test pass')

@@ -18,12 +18,16 @@ from PCIE_test import PCIE_test
 from SSD_test import SSD_test
 from SFP_test import SFP_test
 from switch_keycode import switch_keycode
+from Verify_SN import Verify_SN
 
-ETHPORT = 'enp2s0'
 HOSTPORT = '10.168.1.124'
 buildoption_type='Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
 logname = 'ft_test_log.txt'
+ETHPORT = 'enp3s0'
 hostname = '10.168.1.213'
+IPMIPORT = '10.168.1.214'
+DEFGW = '10.168.1.1'
+ETHPORT_IP = '10.168.1.215'
 port = 22
 username = 'root'
 password = '1'
@@ -126,144 +130,182 @@ class Frame(wx.Frame):
         panel.SetSizer(vbox)
         panel.Layout()
 
-    def start_test(self, event):
+    def on_key_press(self, event):
+        # print('key press')
+        global Key_Code,value,value2,t_press
+        t_press = time.time()
+        Key_Code = event.GetKeyCode()
+        if (48 <= Key_Code <= 90):
+            value = switch_keycode(Key_Code).switch_content()
+            value2 = str(value2) + str(value)
+            # print(value)
+            # print(value2)
+        # event.Skip()
 
+    def on_key_release(self, event):
+        # print('key release')
+        t_realease = time.time()
+        duration = t_realease - t_press
+        # print(duration)
+        global value2
+        if duration > 0.04:
+            warning_message = wx.MessageDialog(None, "please do not input manually", "warning", wx.OK | wx.ICON_INFORMATION)
+            value2 = ''
+            self.m_serial.Clear()
+            if warning_message.ShowModal() == wx.ID_OK:
+                warning_message.Destroy()
+        elif Key_Code == 13:
+            # print('press enter')
+            self.m_serial.SetValue(value2)
+        # event.Skip()
+
+    def start_test(self, event):
 
         self.start_dialog = wx.MessageDialog(None, "要进行测试吗？ Do You Want To Test?", "测试", wx.YES_NO | wx.ICON_QUESTION)
         self.start_result = self.start_dialog.ShowModal()
         self.start_dialog.Destroy()
-        connect = subprocess.getoutput("ping -c 2 %s" % hostname)
-        print(connect)
-        if ('100% packet loss' in connect):
-            print("connect to device failed")
-        else:
-            print("connect to device success")
+
 
         if self.start_result == wx.ID_YES:
+            # self.start_dialog.Destroy()
+            Serial_number = self.m_serial.GetValue()
+            SN_check = Verify_SN(Serial_number).test_content()
+            connect = subprocess.getoutput("ping -c 2 %s" % hostname)
+            if (SN_check == 'FAIL'):
+                warning_message = wx.MessageDialog(None, "Wrong serial or serial number has lower case", "warning", wx.OK | wx.ICON_INFORMATION)
+                if warning_message.ShowModal() == wx.ID_OK:
+                    warning_message.Destroy()
 
-            T_101_VGA = self.T_01_VGA.GetValue()
-            T_102_Write_MAC = self.T_02_Write_MAC.GetValue()
-            T_103_Write_FRU = self.T_03_Write_FRU.GetValue()
+            elif ('100% packet loss' in connect):
+                warning_message = wx.MessageDialog(None, "Connect to BBU failed, test stop", "warning", wx.OK | wx.ICON_INFORMATION)
+                if warning_message.ShowModal() == wx.ID_OK:
+                    warning_message.Destroy()
 
-            T_104_ETH = self.T_04_ETH.GetValue()
-            T_105_SFP = self.T_05_SFP.GetValue()
-            T_106_CPU = self.T_06_CPU.GetValue()
-
-            T_107_Memort = self.T_07_Memory.GetValue()
-            T_108_Console = self.T_08_Console.GetValue()
-            T_109_USB = self.T_09_USB.GetValue()
-
-            T_110_PCI_E = self.T_10_PCI_E.GetValue()
-            T_111_SATA = self.T_11_SATA.GetValue()
-            T_112_M_2 = self.T_12_M_2.GetValue()
-
-            self.m_serial.Enable(False)
-            self.test_bt.Disable()
-            self.test_bt.SetBackgroundColour((0, 220, 18))
-            self.test_bt.SetFont(self.font_01)
-            self.test_bt.SetLabelText("Testing")
-
-            sn = self.m_serial.GetValue()
-            print(sn)
-
-            if T_101_VGA:
-                global VGA_result
-                VGA_result = VGA_test(logname).test_content()
-                print('VGA test result is %s' % (VGA_result))
             else:
-                VGA_result = 'not test'
+                T_101_VGA = self.T_01_VGA.GetValue()
+                T_102_Write_MAC = self.T_02_Write_MAC.GetValue()
+                T_103_Write_FRU = self.T_03_Write_FRU.GetValue()
 
-            # print(T_101_VGA)
-            # print(T_102_Write_MAC)
-            # print(T_103_Write_FRU)
-            # time.sleep(3)
-            self.test_bt.SetLabelText("Testing 30%")
+                T_104_ETH = self.T_04_ETH.GetValue()
+                T_105_SFP = self.T_05_SFP.GetValue()
+                T_106_CPU = self.T_06_CPU.GetValue()
 
-            if T_104_ETH:
-                global ETH_result
-                ETH_result = ETH_test(logname, ETHPORT, HOSTPORT, hostname, port, username, password).test_content()
-                print('ETH test result is %s' % (ETH_result))
-            else:
-                ETH_result = 'not test'
-            if T_105_SFP:
-                global SFP_result
-                SFP_result = SFP_test(logname, hostname, port, username, password, SFPPORT1, SFPPORT2, SFPPORT3,
-                                      SFPPORT4).test_content()
-                print('SFP test result is %s' % (SFP_result))
-            else:
-                SFP_result = 'not test'
-            if T_106_CPU:
-                global CPU_result
-                CPU_result = CPU_test(logname, buildoption_type, hostname, port, username, password).test_content()
-                print('CPU test result is %s' % (CPU_result))
-            else:
-                CPU_result = 'not test'
-            # print(T_104_ETH)
-            # print(T_105_SFP)
-            # print(T_106_CPU)
+                T_107_Memort = self.T_07_Memory.GetValue()
+                T_108_Console = self.T_08_Console.GetValue()
+                T_109_USB = self.T_09_USB.GetValue()
 
-            # time.sleep(3)
-            self.test_bt.SetLabelText("Testing 60%")
+                T_110_PCI_E = self.T_10_PCI_E.GetValue()
+                T_111_SATA = self.T_11_SATA.GetValue()
+                T_112_M_2 = self.T_12_M_2.GetValue()
 
-            if T_107_Memort:
-                global Memory_result
-                Memory_result = Memory_test(logname, hostname, port, username, password).test_content()
-                print('Memory test result is %s' % (Memory_result))
-            else:
-                Memory_result = 'not test'
-            if T_108_Console:
-                global CONSOLE_result
-                CONSOLE_result = CONSOLE_test(logname, hostname, port, username, password).test_content()
-                print('CONSOLE test result is %s' % (CONSOLE_result))
-            else:
-                CONSOLE_result = 'not test'
-            if T_109_USB:
-                global USB_result
-                USB_result = USB_test(logname, hostname, port, username, password).test_content()
-                print('USB test result is %s' % (USB_result))
-            else:
-                USB_result = 'not test'
-            # print(T_107_Memort)
-            # print(T_108_Console)
-            # print(T_109_USB)
+                self.m_serial.Enable(False)
+                self.test_bt.Disable()
+                self.test_bt.SetBackgroundColour((0, 220, 18))
+                self.test_bt.SetFont(self.font_01)
+                self.test_bt.SetLabelText("Testing")
 
-            # time.sleep(3)
-            self.test_bt.SetLabelText("Testing 90%")
+                sn = self.m_serial.GetValue()
+                print(sn)
 
-            if T_110_PCI_E:
-                global PCIE_result
-                PCIE_result = PCIE_test(logname, hostname, port, username, password).test_content()
-                print('PCIE test result is %s' % (PCIE_result))
-            else:
-                PCIE_result = 'not test'
-            if T_111_SATA:
-                global SATA_result
-                SATA_result = SATA_test(logname, hostname, port, username, password).test_content()
-                print('SATA test result is %s' % (SATA_result))
-            else:
-                SATA_result = 'not test'
-            if T_112_M_2:
-                global SSD_result
-                SSD_result = SSD_test(logname, hostname, port, username, password).test_content()
-                print('M.2 test result is %s' % (SSD_result))
-            else:
-                SSD_result = 'not test'
-            # print(T_110_PCI_E)
-            # print(T_111_SATA)
-            # print(T_112_M_2)
+                if T_101_VGA:
+                    global VGA_result
+                    VGA_result = VGA_test(logname).test_content()
+                    print('VGA test result is %s' % (VGA_result))
+                else:
+                    VGA_result = 'not test'
 
-            # time.sleep(2)
-            self.test_bt.SetLabelText("Testing 100%")
-            print("Yes")
+                # print(T_101_VGA)
+                # print(T_102_Write_MAC)
+                # print(T_103_Write_FRU)
+                # time.sleep(3)
+                self.test_bt.SetLabelText("Testing 30%")
 
-            test_result = 'VGA: %s \rETH: %s \rSFP: %s \rCPU: %s\rMemory: %s\rCONSOLE: %s\rUSB: %s\rPCIE: %s\r SATA: %s\rM.2: %s\r'\
-                          %(VGA_result, ETH_result, SFP_result, CPU_result, Memory_result, CONSOLE_result, USB_result, PCIE_result, SATA_result, SSD_result)
+                if T_104_ETH:
+                    global ETH_result
+                    ETH_result = ETH_test(logname, ETHPORT, HOSTPORT, IPMIPORT, DEFGW, ETHPORT_IP, hostname, port, username, password).test_content()
+                    print('ETH test result is %s' % (ETH_result))
+                else:
+                    ETH_result = 'not test'
+                if T_105_SFP:
+                    global SFP_result
+                    SFP_result = SFP_test(logname, hostname, port, username, password, SFPPORT1, SFPPORT2, SFPPORT3,
+                                          SFPPORT4).test_content()
+                    print('SFP test result is %s' % (SFP_result))
+                else:
+                    SFP_result = 'not test'
+                if T_106_CPU:
+                    global CPU_result
+                    CPU_result = CPU_test(logname, buildoption_type, hostname, port, username, password).test_content()
+                    print('CPU test result is %s' % (CPU_result))
+                else:
+                    CPU_result = 'not test'
+                # print(T_104_ETH)
+                # print(T_105_SFP)
+                # print(T_106_CPU)
 
-            self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", test_result, wx.OK | wx.ICON_INFORMATION)
-            self.summary_result = self.summary_dialog.ShowModal()
-            self.summary_dialog.Destroy()
+                # time.sleep(3)
+                self.test_bt.SetLabelText("Testing 60%")
 
-            self.Destroy()
+                if T_107_Memort:
+                    global Memory_result
+                    Memory_result = Memory_test(logname, hostname, port, username, password).test_content()
+                    print('Memory test result is %s' % (Memory_result))
+                else:
+                    Memory_result = 'not test'
+                if T_108_Console:
+                    global CONSOLE_result
+                    CONSOLE_result = CONSOLE_test(logname, hostname, port, username, password).test_content()
+                    print('CONSOLE test result is %s' % (CONSOLE_result))
+                else:
+                    CONSOLE_result = 'not test'
+                if T_109_USB:
+                    global USB_result
+                    USB_result = USB_test(logname, hostname, port, username, password).test_content()
+                    print('USB test result is %s' % (USB_result))
+                else:
+                    USB_result = 'not test'
+                # print(T_107_Memort)
+                # print(T_108_Console)
+                # print(T_109_USB)
+
+                # time.sleep(3)
+                self.test_bt.SetLabelText("Testing 90%")
+
+                if T_110_PCI_E:
+                    global PCIE_result
+                    PCIE_result = PCIE_test(logname, hostname, port, username, password).test_content()
+                    print('PCIE test result is %s' % (PCIE_result))
+                else:
+                    PCIE_result = 'not test'
+                if T_111_SATA:
+                    global SATA_result
+                    SATA_result = SATA_test(logname, hostname, port, username, password).test_content()
+                    print('SATA test result is %s' % (SATA_result))
+                else:
+                    SATA_result = 'not test'
+                if T_112_M_2:
+                    global SSD_result
+                    SSD_result = SSD_test(logname, hostname, port, username, password).test_content()
+                    print('M.2 test result is %s' % (SSD_result))
+                else:
+                    SSD_result = 'not test'
+                # print(T_110_PCI_E)
+                # print(T_111_SATA)
+                # print(T_112_M_2)
+
+                # time.sleep(2)
+                self.test_bt.SetLabelText("Testing 100%")
+                print("Yes")
+
+                test_result = 'VGA: %s \rETH: %s \rSFP: %s \rCPU: %s\rMemory: %s\rCONSOLE: %s\rUSB: %s\rPCIE: %s\r SATA: %s\rM.2: %s\r'\
+                              %(VGA_result, ETH_result, SFP_result, CPU_result, Memory_result, CONSOLE_result, USB_result, PCIE_result, SATA_result, SSD_result)
+
+                self.summary_dialog = wx.MessageDialog(None, "测试结果如下：", test_result, wx.OK | wx.ICON_INFORMATION)
+                self.summary_result = self.summary_dialog.ShowModal()
+                self.summary_dialog.Destroy()
+
+                self.Destroy()
+
         else:
             print("No")
             print("No")
@@ -280,39 +322,12 @@ class Frame(wx.Frame):
         if result == wx.ID_YES:
             self.Destroy()
 
-    def on_key_press(self, event):
-        # print('key press')
-        global Key_Code,value,value2,t_press
-        t_press = time.time()
-        Key_Code = event.GetKeyCode()
-        if (48 <= Key_Code <= 90):
-            value = switch_keycode(Key_Code).switch_content()
-            value2 = str(value2) + str(value)
-            # print(value)
-            # print(value2)
-
-    def on_key_release(self, event):
-        # print('key release')
-        t_realease = time.time()
-        duration = t_realease - t_press
-        # print(duration)
-        global value2
-        if duration > 0.04:
-            warning_message = wx.MessageDialog(None, "please do not input manually", "warning", wx.OK | wx.ICON_INFORMATION)
-            value2 = ''
-            if warning_message.ShowModal() == wx.ID_OK:
-                warning_message.Destroy()
-        elif Key_Code == 13:
-            # print('press enter')
-            self.m_serial.SetValue(value2)
-
-
 
 
 
 class MyApp(wx.App):
     def OnInit(self):
-        self.frame = Frame("Function Test Platform V0.9")
+        self.frame = Frame("Function Test Platform V1.0")
         self.Bind(wx.EVT_KEY_DOWN, self.frame.on_key_press)
         self.Bind(wx.EVT_KEY_UP, self.frame.on_key_release)
         self.frame.Show()

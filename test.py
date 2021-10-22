@@ -11,11 +11,14 @@ from PCIE_test import PCIE_test
 from SSD_test import SSD_test
 from SFP_test import SFP_test
 
-ETHPORT = 'enp2s0'
 HOSTPORT = '10.168.1.124'
 buildoption_type='Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
 logname = 'ft_test_log.txt'
+ETHPORT = 'enp3s0'
 hostname = '10.168.1.213'
+IPMIPORT = '10.168.1.214'
+DEFGW = '10.168.1.1'
+ETHPORT_IP = '10.168.1.215'
 port = 22
 username = 'root'
 password = '1'
@@ -33,7 +36,7 @@ SFPPORT4 = 'enp184s0f3'
 
 subprocess.getoutput("rm -f %s"%(logname))
 
-testitem=['CONSOLE_BBU']
+testitem=['ETH_BBU']
 
 # testitem=['VGA_BBU','ETH_BBU','USB_BBU','SATA_BBU','M.2_BBU',
 #           'SFP_BBU','CPU_BBU','MEMORY_BBU','CONSOLE_BBU','PCIE_BBU']
@@ -42,7 +45,7 @@ for item in testitem:
         VGA_result=VGA_test(logname).test_content()
         print('VGA result is %s'%(VGA_result))
     if (item=='ETH_BBU'):
-        ETH_result=ETH_test(logname,ETHPORT,HOSTPORT,hostname,port,username,password).test_content()
+        ETH_result=ETH_test(logname, ETHPORT, HOSTPORT, IPMIPORT, DEFGW, ETHPORT_IP, hostname, port, username, password).test_content()
         print('ETH result is %s'%(ETH_result))
     if (item=='USB_BBU'):
         USB_result=USB_test(logname,hostname,port,username,password).test_content()
