@@ -36,7 +36,7 @@ SFPPORT4 = 'enp184s0f3'
 
 subprocess.getoutput("rm -f %s"%(logname))
 
-testitem=['ETH_BBU']
+testitem=['USB_BBU']
 
 # testitem=['VGA_BBU','ETH_BBU','USB_BBU','SATA_BBU','M.2_BBU',
 #           'SFP_BBU','CPU_BBU','MEMORY_BBU','CONSOLE_BBU','PCIE_BBU']

@@ -1,9 +1,4 @@
-import paramiko
-import time
 import subprocess
-import threading
-import ctypes
-import inspect
 import serial
 
 

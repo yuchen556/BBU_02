@@ -19,6 +19,8 @@ from SSD_test import SSD_test
 from SFP_test import SFP_test
 from switch_keycode import switch_keycode
 from Verify_SN import Verify_SN
+from Search_SN_Maxwell import fetch_MAC
+from Write_MAC import write_Mac
 
 HOSTPORT = '10.168.1.124'
 buildoption_type='Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
@@ -36,6 +38,10 @@ SFPPORT2 = 'enp184s0f1'
 SFPPORT3 = 'enp184s0f2'
 SFPPORT4 = 'enp184s0f3'
 value2 = ''
+mysql_host = 'localhost'
+mysql_user = 'root'
+mysql_password = 'joinus123'
+mysql_database = 'ftdb'
 
 subprocess.getoutput("rm -f %s"%(logname))
 
@@ -206,6 +212,16 @@ class Frame(wx.Frame):
 
                 sn = self.m_serial.GetValue()
                 print(sn)
+
+                if T_102_Write_MAC:
+                    global Write_MAC_result
+                    Mac_address = fetch_MAC(logname, sn, mysql_host, mysql_user, mysql_password, mysql_database).search_db_sn()
+                    if (Mac_address == 'No need to fetch MAC'):
+                        Write_MAC_result = 'tested board, skip this step'
+                    else:
+                        Write_MAC_result = write_Mac(logname, hostname, port, username, password, Mac_address).test_content()
+                else:
+                    Write_MAC_result = 'no write'
 
                 if T_101_VGA:
                     global VGA_result

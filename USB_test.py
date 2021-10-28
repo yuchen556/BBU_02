@@ -51,10 +51,10 @@ class USB_test:
             # print('Keyboard Test failed, error code is 04002')
             with open(self.logname, 'a+') as f:
                 f.write("Keyboard Test failed, error code is 04002\r")
-        elif(usb_num != 1):
+        elif(usb_num != 2):
             # print('USB Test failed, error code is 04001')
             with open(self.logname, 'a+') as f:
-                f.write("USB Test failed, error code is 04001\r")
+                f.write("USB Test failed, usn device number is %s error code is 04001\r" % usb_num)
         else:
             # print('USB Test Pass')
             USB_result='PASS'
