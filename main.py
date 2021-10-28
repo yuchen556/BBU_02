@@ -213,6 +213,7 @@ class Frame(wx.Frame):
                 sn = self.m_serial.GetValue()
                 print(sn)
 
+
                 if T_102_Write_MAC:
                     global Write_MAC_result
                     Mac_address = fetch_MAC(logname, sn, mysql_host, mysql_user, mysql_password, mysql_database).search_db_sn()
@@ -222,6 +223,7 @@ class Frame(wx.Frame):
                         Write_MAC_result = write_Mac(logname, hostname, port, username, password, Mac_address).test_content()
                 else:
                     Write_MAC_result = 'no write'
+
 
                 if T_101_VGA:
                     global VGA_result
@@ -236,12 +238,15 @@ class Frame(wx.Frame):
                 # time.sleep(3)
                 self.test_bt.SetLabelText("Testing 30%")
 
+
                 if T_104_ETH:
                     global ETH_result
                     ETH_result = ETH_test(logname, ETHPORT, HOSTPORT, IPMIPORT, DEFGW, ETHPORT_IP, hostname, port, username, password).test_content()
                     print('ETH test result is %s' % (ETH_result))
                 else:
                     ETH_result = 'not test'
+
+
                 if T_105_SFP:
                     global SFP_result
                     SFP_result = SFP_test(logname, hostname, port, username, password, SFPPORT1, SFPPORT2, SFPPORT3,
@@ -249,6 +254,8 @@ class Frame(wx.Frame):
                     print('SFP test result is %s' % (SFP_result))
                 else:
                     SFP_result = 'not test'
+
+
                 if T_106_CPU:
                     global CPU_result
                     CPU_result = CPU_test(logname, buildoption_type, hostname, port, username, password).test_content()
@@ -268,12 +275,16 @@ class Frame(wx.Frame):
                     print('Memory test result is %s' % (Memory_result))
                 else:
                     Memory_result = 'not test'
+
+
                 if T_108_Console:
                     global CONSOLE_result
                     CONSOLE_result = CONSOLE_test(logname, hostname, port, username, password).test_content()
                     print('CONSOLE test result is %s' % (CONSOLE_result))
                 else:
                     CONSOLE_result = 'not test'
+
+
                 if T_109_USB:
                     global USB_result
                     USB_result = USB_test(logname, hostname, port, username, password).test_content()
@@ -293,12 +304,16 @@ class Frame(wx.Frame):
                     print('PCIE test result is %s' % (PCIE_result))
                 else:
                     PCIE_result = 'not test'
+
+
                 if T_111_SATA:
                     global SATA_result
                     SATA_result = SATA_test(logname, hostname, port, username, password).test_content()
                     print('SATA test result is %s' % (SATA_result))
                 else:
                     SATA_result = 'not test'
+
+
                 if T_112_M_2:
                     global SSD_result
                     SSD_result = SSD_test(logname, hostname, port, username, password).test_content()
