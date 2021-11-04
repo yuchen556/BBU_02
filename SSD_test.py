@@ -1,7 +1,7 @@
 import paramiko
 
 class SSD_test:
-    def __init__(self,logname,hostname,port,username,password):
+    def __init__(self, logname, hostname, port, username, password):
         self.logname = logname
         self.hostname = hostname
         self.port = port
@@ -18,23 +18,24 @@ class SSD_test:
 
         with open(self.logname, 'a+') as f:
             f.write("\r\rM.2 test start \r")
-        SSD_result='FAIL'
+        SSD_result = 'FAIL'
 
         stdin, stdout, stderr = ssh.exec_command("fdisk -l")
         disk_info = stdout.read()
         with open(self.logname, 'a+') as f:
-            f.write("The disk info is:\r  '%s'\r" % (disk_info))
+            f.write("The disk info is:\r  '%s'\r" % disk_info.decode())
         stdin, stdout, stderr = ssh.exec_command("fdisk -l | grep '512.1 GB' | wc -l")
         disk_number1 = int(stdout.read())
         stdin, stdout, stderr = ssh.exec_command("fdisk -l | grep '1024.2 GB' | wc -l")
         disk_number2 = int(stdout.read())
         disk_number = disk_number1 + disk_number2
-        if (disk_number!=2):
+        if disk_number != 2:
             # print("M.2 disk number detect failed, the number should be 2 while only '%d' detected"%(disk_number))
             with open(self.logname, 'a+') as f:
-                f.write("M.2 disk number detect failed, the number should be 2 while only '%d' detected, error code 20001\r"%(disk_number))
+                f.write("M.2 disk number detect failed, the number should be 2 while only '%d' detected, "
+                        "error code 20001\r" % disk_number)
         else:
-            SSD_result='PASS'
+            SSD_result = 'PASS'
             # print('M.2 test Pass')
             with open(self.logname, 'a+') as f:
                 f.write("M.2 test Pass\r")

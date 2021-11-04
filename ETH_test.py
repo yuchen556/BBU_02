@@ -40,7 +40,7 @@ class ETH_test:
         ssh.exec_command("ipmitool lan set 1 defgw ipaddr %s" % self.DEFGW)
         ssh.exec_command("ifconfig %s %s/24 up" % (self.ETHPORT, self.ETHPORT_IP))
         with open(self.logname, 'a+') as f:
-            f.write("The ETH info is:\r  '%s'\r" % ethinfo)
+            f.write("The ETH info is:\r  '%s'\r" % ethinfo.decode())
             f.write("set ipmi lan 1 ipaddr is: %s \r" % self.IPMIPORT)
             f.write("set ipmi lan 1 netmask is: 255.255.255.0 \r" )
             f.write("set ipmi lan 1 defgw ipaddr is: %s \r" % self.DEFGW)

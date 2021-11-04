@@ -1,7 +1,7 @@
 import paramiko
 
 class CPU_test:
-    def __init__(self,logname,buildoption_type,hostname,port,username,password):
+    def __init__(self, logname, buildoption_type, hostname, port, username, password):
         self.logname = logname
         self.hostname = hostname
         self.port = port
@@ -20,7 +20,7 @@ class CPU_test:
 
         with open(self.logname, 'a+') as f:
             f.write("\r\rCPU test start \r")
-        CPU_result='FAIL'
+        CPU_result = 'FAIL'
         stdin, stdout, stderr = ssh.exec_command("cat /proc/cpuinfo | grep 'model name'")
         cpu_info=stdout.read()
         cpu_info_error=stderr.read()
@@ -31,9 +31,9 @@ class CPU_test:
         cpu_num_error=stderr.read()
         # print("The CPU core on board is:",cpu_num)
         with open(self.logname, 'a+') as f:
-            f.write("CPU info is:\r  '%s'\rCPU number is:\r  '%d'\r"%(cpu_info,cpu_num))
-        if (self.buildoption_type.encode() in cpu_type):
-            CPU_result='PASS'
+            f.write("CPU info is:\r  '%s'\rCPU number is:\r  '%d'\r" % (cpu_info.decode(), cpu_num))
+        if self.buildoption_type.encode() in cpu_type:
+            CPU_result = 'PASS'
             # print('CPU Test Pass')
             with open(self.logname, 'a+') as f:
                 f.write("CPU Test Pass\r")

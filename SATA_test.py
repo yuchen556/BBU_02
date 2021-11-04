@@ -1,7 +1,7 @@
 import paramiko
 
 class SATA_test:
-    def __init__(self,logname,hostname,port,username,password):
+    def __init__(self, logname, hostname, port, username, password):
         self.logname = logname
         self.hostname = hostname
         self.port = port
@@ -23,15 +23,15 @@ class SATA_test:
         stdin, stdout, stderr = ssh.exec_command("fdisk -l")
         disk_info = stdout.read()
         with open(self.logname, 'a+') as f:
-            f.write("The disk info is:\r  '%s'\r" % (disk_info))
+            f.write("The disk info is:\r  '%s'\r" % disk_info.decode())
         stdin, stdout, stderr = ssh.exec_command("fdisk -l | grep '120.0 GB' | wc -l")
         SATA_number = int(stdout.read())
-        if (SATA_number != 2):
+        if SATA_number != 2:
             # print("SATA number detect failed, the number should be 2 while only '%d' detected" % (SATA_number))
             with open(self.logname, 'a+') as f:
                 f.write(
-                    "SATA number detect failed, the number should be 2 while only '%d' detected, error code 03001\r" % (
-                        SATA_number))
+                    "SATA number detect failed, the number should be 2 while only '%d' detected, error code 03001\r"
+                    % SATA_number)
         else:
             SATA_result = 'PASS'
             # print('SATA test Pass')
