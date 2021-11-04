@@ -23,21 +23,21 @@ from Search_SN_Maxwell import fetch_MAC
 from Write_MAC import write_Mac
 from Write_FRU import write_FRU
 
-HOSTPORT = '10.168.1.124'
-buildoption_type='Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
+HOSTPORT = '10.168.1.124'  # This PC port IP
+buildoption_type = 'Intel(R) Xeon(R) D-2177NT CPU @ 1.90GHz'
 logname = 'ft_test_log.txt'
-ETHPORT = 'enp3s0'
-hostname = '10.168.1.213'
-IPMIPORT = '10.168.1.214'
+ETHPORT = 'enp3s0'  # BBU Ethernet port name
+hostname = '10.168.1.213'  # BBU USB port IP
+IPMIPORT = '10.168.1.214'  # BBU IPMI port IP
 DEFGW = '10.168.1.1'
-ETHPORT_IP = '10.168.1.215'
+ETHPORT_IP = '10.168.1.215'  # BBU ETH port IP
 port = 22
-username = 'root'
-password = '1'
-SFPPORT1 = 'enp184s0f0'
-SFPPORT2 = 'enp184s0f1'
-SFPPORT3 = 'enp184s0f2'
-SFPPORT4 = 'enp184s0f3'
+username = 'root'  # BBU login user
+password = '1'  # BBU login password
+SFPPORT1 = 'enp184s0f0'  # BBU SFP port1 name
+SFPPORT2 = 'enp184s0f1'  # BBU SFP port2 name
+SFPPORT3 = 'enp184s0f2'  # BBU SFP port3 name
+SFPPORT4 = 'enp184s0f3'  # BBU SFP port4 name
 value2 = ''
 mysql_host = 'localhost'
 mysql_user = 'root'
@@ -233,12 +233,12 @@ class Frame(wx.Frame):
                     global Write_MAC_result
                     Mac_address = fetch_MAC(logname, sn, mysql_host, mysql_user, mysql_password,
                                             mysql_database).search_db_sn()
-                    print('fetch MAC address : ', Mac_address)
+                    # print('fetch MAC address : ', Mac_address)
                     if Mac_address == 'No need to fetch MAC':
                         Write_MAC_result = 'the board is tested board, skip this step'
                         Write_MAC_result = 'no write'
                     elif Mac_address == 'FAIL':
-                        print("Operate mysql db error")
+                        # print("Operate mysql db error")
                         Write_MAC_result = 'FAIL'
                     else:
                         Write_MAC_result = write_Mac(logname, hostname, port, username, password,

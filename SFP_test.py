@@ -65,8 +65,8 @@ class SFP_test:
             ping_port2 = '192.168.2.30'
             ping_port3 = '192.168.1.31'
             ping_port4 = '192.168.2.31'
-            fail_cnt=0
-            cnt=0
+            fail_cnt = 0
+            cnt = 0
             ssh.exec_command("ip netns add net1")
             ssh.exec_command("ip link set '%s' netns net1" % self.SFPPORT1)
             ssh.exec_command("ip link set '%s' netns net1" % self.SFPPORT2)
@@ -74,27 +74,29 @@ class SFP_test:
             ssh.exec_command("ip netns exec net1 ifconfig '%s' 192.168.2.30/24 up" % self.SFPPORT2)
             ssh.exec_command("ifconfig '%s' 192.168.1.31/24 up" % self.SFPPORT3)
             ssh.exec_command("ifconfig '%s' 192.168.2.31/24 up" % self.SFPPORT4)
-            while cnt < 6:
+            while cnt < 3:
                 stdin, stdout, stderr = ssh.exec_command("ping -c 15 -I '%s' '%s'" % (ping_port3, ping_port1))
                 upper_ping_info = stdout.read()
                 with open(self.logname, 'a+') as f:
-                    f.write("\r\rthe '%d' upper SFP ping info is: \r  '%s'\r"%(cnt+1,upper_ping_info))
+                    f.write("\rthe '%d' upper SFP ping info is: \r  '%s'\r" % (cnt+1, upper_ping_info.decode()))
                 stdin, stdout, stderr = ssh.exec_command("ping -c 15 -I '%s' '%s'" % (ping_port4, ping_port2))
                 under_ping_info = stdout.read()
                 with open(self.logname, 'a+') as f:
-                    f.write("\r\rthe '%d' under SFP ping info is: \r  '%s'\r"%(cnt+1,under_ping_info))
+                    f.write("\rthe '%d' under SFP ping info is: \r  '%s'\r" % (cnt+1, under_ping_info.decode()))
                 if (not('0% packet loss'.encode() in under_ping_info) or
-                        ('10% packet loss'.encode() in under_ping_info) or ('100% packet loss'.encode() in under_ping_info)):
+                        ('10% packet loss'.encode() in under_ping_info) or
+                        ('100% packet loss'.encode() in under_ping_info)):
                     fail_cnt += 1
                     cnt+=1
                 elif(not('0% packet loss'.encode() in under_ping_info) or
-                        ('10% packet loss'.encode() in under_ping_info) or ('100% packet loss'.encode() in under_ping_info)):
+                        ('10% packet loss'.encode() in under_ping_info) or
+                     ('100% packet loss'.encode() in under_ping_info)):
                     fail_cnt += 1
                     cnt += 1
                 else:
                     # print('Test Pass')
                     cnt += 1
-            if fail_cnt < 3:
+            if fail_cnt < 2:
                 SFP_result = 'PASS'
                 # print('SFP Test Pass')
                 with open(self.logname, 'a+') as f:

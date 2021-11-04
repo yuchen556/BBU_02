@@ -55,7 +55,8 @@ class USB_test:
         elif usb_num != 2:
             # print('USB Test failed, error code is 04001')
             with open(self.logname, 'a+') as f:
-                f.write("USB Test failed, usn device number is %s error code is 04001\r" % usb_num)
+                f.write("USB Test failed, only detect %s usb number, "
+                        "the right number should be 2 error code is 04001\r" % usb_num)
         else:
             # print('USB Test Pass')
             USB_result = 'PASS'

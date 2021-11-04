@@ -34,43 +34,40 @@ class ETH_test:
         # os.system("ifconfig '%s' 192.168.217.131/24 up"%(ETHPORT))
         stdin, stdout, stderr = ssh.exec_command("ethtool %s" % self.ETHPORT)
         ethinfo = stdout.read()
-        ssh.exec_command("ipmitool lan set 1 ipsrc static" )
+        ssh.exec_command("ipmitool lan set 1 ipsrc static")
         ssh.exec_command("ipmitool lan set 1 ipaddr %s" % self.IPMIPORT)
         ssh.exec_command("ipmitool lan set 1 netmask 255.255.255.0" )
         ssh.exec_command("ipmitool lan set 1 defgw ipaddr %s" % self.DEFGW)
         ssh.exec_command("ifconfig %s %s/24 up" % (self.ETHPORT, self.ETHPORT_IP))
         with open(self.logname, 'a+') as f:
-            f.write("The ETH info is:\r  '%s'\r" % ethinfo.decode())
+            f.write("The ETH info is:\r '%s'\r" % ethinfo.decode())
             f.write("set ipmi lan 1 ipaddr is: %s \r" % self.IPMIPORT)
-            f.write("set ipmi lan 1 netmask is: 255.255.255.0 \r" )
+            f.write("set ipmi lan 1 netmask is: 255.255.255.0 \r")
             f.write("set ipmi lan 1 defgw ipaddr is: %s \r" % self.DEFGW)
             f.write("set %s ipaddr is: %s \r" % (self.ETHPORT, self.ETHPORT_IP))
-
 
         IPMI_Info = subprocess.getoutput("ipmitool -H %s -U aaa -P joinus123 -I lanplus lan print 1" % self.IPMIPORT)
         with open(self.logname, 'a+') as f:
             f.write("The IPMI info get is:\r  '%s'\r" % IPMI_Info)
 
-
-        if (not('Speed: 1000Mb/s'.encode() in ethinfo)):
+        if 'Speed: 1000Mb/s'.encode() not in ethinfo:
             # print('ETH Test fail, error code 05002')
             with open(self.logname, 'a+') as f:
                 f.write("ETH Test fail, ethinfo check failed, error code 05002\r")
 
-
-        elif (not (self.IPMIPORT in IPMI_Info)):
+        elif self.IPMIPORT not in IPMI_Info:
             with open(self.logname, 'a+') as f:
-                f.write("ETH Test fail, IPMIinfo check failed, error code 05003\r")
+                f.write("ETH Test fail, IPMI info check failed, error code 05003\r")
 
 
         else:
-            while (cnt<6):
+            while cnt< 3:
                 # print('ethinfo is:', ethinfo)
-                pinginfo = subprocess.getoutput("ping -c 15 %s" % (self.ETHPORT_IP))
+                pinginfo = subprocess.getoutput("ping -c 15 %s" % self.ETHPORT_IP)
                 # print('pinginfo is:', pinginfo)
                 # print(pinginfo)
                 with open(self.logname, 'a+') as f:
-                    f.write("The '%d' ping info is:\r  '%s'\r" % (cnt+1,pinginfo))
+                    f.write("The '%d' ping info is:\r  '%s'\r" % (cnt+1, pinginfo))
                 if (not('Link detected: yes'.encode() in ethinfo) or not('0% packet loss' in pinginfo) or
                         ('10% packet loss' in pinginfo) or ('100% packet loss' in pinginfo)):
                     fail_cnt += 1
@@ -78,7 +75,7 @@ class ETH_test:
                 else:
                     # print('Test Pass')
                     cnt += 1
-            if (fail_cnt < 3):
+            if fail_cnt < 2:
                 ETH_result = 'PASS'
                 # print('ETH Test Pass')
                 with open(self.logname, 'a+') as f:
