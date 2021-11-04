@@ -233,6 +233,12 @@ class Frame(wx.Frame):
                     global Write_MAC_result
                     Mac_address = fetch_MAC(logname, sn, mysql_host, mysql_user, mysql_password,
                                             mysql_database).search_db_sn()
+                    free_mac = fetch_MAC(logname, sn, mysql_host, mysql_user, mysql_password,
+                                            mysql_database).search_free_mac()
+                    if free_mac < 200:
+                        warning = wx.MessageBox('MAC地址不足，请联系上海众新补充MAC地址', 'info', wx.OK | wx.ICON_INFORMATION)
+                        if warning.ShowModal() == wx.ID_OK:
+                            warning.Destroy()
                     # print('fetch MAC address : ', Mac_address)
                     if Mac_address == 'No need to fetch MAC':
                         Write_MAC_result = 'the board is tested board, skip this step'

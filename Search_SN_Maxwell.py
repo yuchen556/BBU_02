@@ -19,7 +19,7 @@ class fetch_MAC:
     def search_db_sn(self):
 
         with open(self.logname, 'a+') as f:
-            f.write("\r\rstart fetch sn \r")
+            f.write("\r\rstart fetch MAC \r")
         # query0: search the scanned sn is existed in mac_spinel table or not
         query0 = "SELECT * FROM machistory WHERE mac_status = '%s'" % self.SN
         # query01: search the free in the mac_spinel table or not
@@ -157,8 +157,10 @@ class fetch_MAC:
             # get all the rowcount of this sn
             mycursor.execute(query01)
             result_query0_all = mycursor.fetchall()
-            available_mac = mycursor.rowcount
-            print(available_mac)
+            available_mac = int(mycursor.rowcount)
+            with open(self.logname, 'a+') as f:
+                f.write("Rest MAC address number is: %d \r" % available_mac)
+            # print(available_mac)
             return available_mac
 
         except:
